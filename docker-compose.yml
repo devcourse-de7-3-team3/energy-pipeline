@@ -1,0 +1,173 @@
+version: "3.8"
+
+# ====================================
+#  COMMON CONFIG
+# ====================================
+x-airflow-common: &airflow-common
+  build:
+    context: ./airflow
+    dockerfile: Dockerfile     # Docker 파일 위치 명시
+  env_file:
+    - .env                     # Snowflake / Airflow 설정 주입
+  environment:
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+
+    # Celery & Redis
+    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+
+    # Airflow Config
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: "False"
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    AIRFLOW__CORE__PLUGINS_FOLDER: /opt/airflow/plugins
+
+    # dbt Config
+    DBT_PROFILES_DIR: /opt/airflow/dbt/energy_model
+    DBT_TARGET: dev
+
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./airflow/logs:/opt/airflow/logs
+    - ./dbt:/opt/airflow/dbt
+
+  user: "${AIRFLOW_UID:-50000}:0"
+
+  # restart 정책 제거 (init loop 문제 방지)
+  restart: "no"
+
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+
+# ====================================
+#  SERVICES
+# ====================================
+services:
+
+  # -------------------------------
+  # Postgres (Airflow Backend)
+  # -------------------------------
+  postgres:
+    image: postgres:13
+    container_name: airflow-postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: always
+
+  # -------------------------------
+  # Redis (Celery Broker)
+  # -------------------------------
+  redis:
+    image: redis:7
+    container_name: airflow-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: always
+
+  # -------------------------------
+  # Airflow 초기화 (DB init + admin 생성)
+  # -------------------------------
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: /bin/bash
+    command: -c "
+        airflow db init &&
+        airflow users create --username admin --password admin --firstname admin --lastname user --role Admin --email admin@example.com"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+
+  # -------------------------------
+  # Scheduler
+  # -------------------------------
+  scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    command: bash -c "airflow scheduler"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: always
+
+
+  # -------------------------------
+  # Webserver
+  # -------------------------------
+  webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    command: bash -c "airflow webserver"
+    ports:
+      - "8081:8080"                        # 기존 구동주인 airflow 컨테이너와 포트번호가 겹치지 않기위해 변경
+    depends_on:
+      scheduler:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+
+  # -------------------------------
+  # Triggerer
+  # -------------------------------
+  triggerer:
+    <<: *airflow-common
+    container_name: airflow-triggerer
+    command: bash -c "airflow triggerer"
+    restart: always
+
+
+  # -------------------------------
+  # Celery Worker
+  # -------------------------------
+  worker:
+    <<: *airflow-common
+    container_name: airflow-worker
+    command: bash -c "airflow celery worker"
+    restart: always
+
+
+  # -------------------------------
+  # Flower (Celery Monitoring)
+  # -------------------------------
+  flower:
+    <<: *airflow-common
+    container_name: airflow-flower
+    command: bash -c "airflow celery flower"
+    ports:
+      - "5555:5555"
+    restart: always
+
+
+# ====================================
+#  VOLUMES
+# ====================================
+volumes:
+  postgres-db-volume:
+  

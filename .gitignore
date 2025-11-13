@@ -1,0 +1,119 @@
+# ===========================================================
+# ⚙️ Airflow + dbt + Snowflake 프로젝트용 .gitignore
+# -----------------------------------------------------------
+# 목적:
+#   - 민감정보(.env) 보호
+#   - 불필요한 로그/캐시 제외
+#   - macOS 자동 생성 파일 방지
+#   - 팀원 간 환경 일관성 유지
+# ===========================================================
+
+# -----------------------------
+# 🧱 Python / Airflow
+# -----------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.db
+*.sqlite
+*.pid
+
+# Airflow logs & temp data
+airflow/logs/
+airflow/tmp/
+airflow/airflow-webserver.pid
+
+# DAG parsing cache
+airflow/__pycache__/
+airflow/dags/__pycache__/
+
+# -----------------------------
+# 🧰 Docker & Compose
+# -----------------------------
+.env
+.env.*
+!*.env.example              # 예시 파일은 허용
+*.pid
+*.sock
+*.swp
+*.bak
+*.orig
+*.rej
+volumes/
+
+# Docker artifacts
+*.tar
+*.bak
+*.orig
+*.rej
+
+# -----------------------------
+# 🧊 Snowflake & Secrets
+# -----------------------------
+**/secrets/*
+**/credentials/*
+**/private_key.*
+**/keyfile.json
+
+# -----------------------------
+# ⚙️ dbt
+# -----------------------------
+# dbt 실행 결과 / 캐시
+dbt/energy_model/target/
+dbt/energy_model/dbt_packages/
+dbt/energy_model/logs/
+dbt/energy_model/__pycache__/
+
+# dbt profiles.yml은 env_var() 기반이라 안전하므로 포함
+# ⚠️ IMPORTANT: Do NOT replace env_var() values with credentials.
+!dbt/energy_model/profiles.yml
+
+# -----------------------------
+# 💻 macOS 자동 생성 파일 (중요!)
+# -----------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+Icon\r
+
+# macOS metadata & system files
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.AppleDB
+.AppleDesktop
+.apdisk
+.com.apple.timemachine.donotpresent
+.VolumeIcon.icns
+
+# -----------------------------
+# 🧩 IDE & OS 별
+# -----------------------------
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*.bak
+*.tmp
+Thumbs.db
+
+# -----------------------------
+# 📦 가상환경 / 패키지 관리
+# -----------------------------
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+build/
+dist/
