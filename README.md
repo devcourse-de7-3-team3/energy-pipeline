@@ -1,6 +1,11 @@
 # 프로젝트 Setup Guide
 
-## 2. 프로젝트 구조
+이 프로젝트는 Airflow–Snowflake–dbt 기반의 자동화 데이터 파이프라인 환경을 구축하기 위해 설계되었으며,
+Snowflake 및 dbt 연동에 필요한 환경 변수를 자동 등록 방식으로 표준화·자동화하는 것을 목표로 한다.<br>
+Docker Compose 실행만으로 모든 Snowflake 연결 정보와 Airflow 설정이 자동 적용되기 때문에
+팀원 전체가 추가 설정 없이 **동일한 개발 환경을 즉시 재현(Reproducible Infrastructure)**할 수 있다.
+
+## 프로젝트 구조
 
 ```
 energy-pipeline/
@@ -51,9 +56,9 @@ http://localhost:8081
 
 ### 5) 스노우플레이크 연결정보 Airflow Connection 자동 등록 DAG 실행
 
-#### 5-1) 웹에서 `init_snowflake_connection` DAG 수동 실행
-#### 5-2) Admin > Connection 에서 .env 파일 내 기재한 정보에 맞게 연결정보 등록됨 확인
-#### 5-4) `test_snowflake_connection` DAG 실행하여 snowflake 정상 연결 확인
+#### ① 웹에서 `init_snowflake_connection` DAG 수동 실행
+#### ② Admin > Connection 에서 .env 파일 내 기재한 정보에 맞게 연결정보 등록됨 확인
+#### ③ `test_snowflake_connection` DAG 실행하여 snowflake 정상 연결 확인
 ---
 ## 서비스 관리
 
