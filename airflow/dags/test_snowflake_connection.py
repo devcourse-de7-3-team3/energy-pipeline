@@ -23,12 +23,6 @@ with DAG(
         cursor.execute("SELECT CURRENT_TIMESTAMP();")
         result = cursor.fetchone()
         print(f"✅ Snowflake connected successfully: {result}")
-
-        # 본인 테이블 접속여부 확인 위한 코드 (테이블 생성 선진행 필수)
-        cursor.execute("SELECT COUNT(*) FROM RAW_DATA.POWER_GEN_BY_FUEL_5MIN;")
-        row_count = cursor.fetchone()[0]
-        print(f"📊 POWER_GEN_BY_FUEL_5MIN Row Count = {row_count:,} rows")
-
         cursor.close()
         conn.close()
 
