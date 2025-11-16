@@ -1,48 +1,58 @@
 version: "3.8"
 
 # ====================================
+#  NETWORKS
+# ====================================
+networks:
+  energy-airflow-network:
+    driver: bridge
+
+# ====================================
 #  COMMON CONFIG
 # ====================================
 x-airflow-common: &airflow-common
   build:
     context: ./airflow
-    dockerfile: Dockerfile     # Docker 파일 위치 명시
+    dockerfile: Dockerfile
   env_file:
-    - .env                     # Snowflake / Airflow 설정 주입
+    - .env
   environment:
-    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+      postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}
 
-    # Celery & Redis
-    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    # 병렬 설정
+    AIRFLOW__CORE__PARALLELISM: 16
+    AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: 4
+    AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG: 4
 
-    # Airflow Config
     AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: "False"
     AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
     AIRFLOW__CORE__PLUGINS_FOLDER: /opt/airflow/plugins
 
-    # dbt Config
     DBT_PROFILES_DIR: /opt/airflow/dbt/energy_model
     DBT_TARGET: dev
 
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/plugins:/opt/airflow/plugins
-    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/logs:/opt/airflow/logs:rw
     - ./dbt:/opt/airflow/dbt
 
   user: "${AIRFLOW_UID:-50000}:0"
+  networks:
+    - energy-airflow-network
 
-  # restart 정책 제거 (init loop 문제 방지)
-  restart: "no"
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
 
   depends_on:
     postgres:
-      condition: service_healthy
-    redis:
       condition: service_healthy
 
 
@@ -51,123 +61,100 @@ x-airflow-common: &airflow-common
 # ====================================
 services:
 
-  # -------------------------------
-  # Postgres (Airflow Backend)
-  # -------------------------------
   postgres:
-    image: postgres:13
-    container_name: airflow-postgres
+    image: postgres:13.16
+    container_name: energy-airflow-postgres
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: ${POSTGRES_USER:-airflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow}
+      POSTGRES_DB: ${POSTGRES_DB:-airflow}
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
+      - energy-postgres-db-volume:/var/lib/postgresql/data
+    networks:
+      - energy-airflow-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 5s
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-airflow}"]
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
+      start_period: 10s
+    cpus: "1.0"
+    mem_limit: "1g"
     restart: always
 
-  # -------------------------------
-  # Redis (Celery Broker)
-  # -------------------------------
-  redis:
-    image: redis:7
-    container_name: airflow-redis
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    restart: always
-
-  # -------------------------------
-  # Airflow 초기화 (DB init + admin 생성)
-  # -------------------------------
   airflow-init:
     <<: *airflow-common
-    container_name: airflow-init
+    container_name: energy-airflow-init
     entrypoint: /bin/bash
     command: -c "
-        airflow db init &&
-        airflow users create --username admin --password admin --firstname admin --lastname user --role Admin --email admin@example.com"
+      airflow db init &&
+      airflow users create \
+        --username ${AIRFLOW_ADMIN_USERNAME:-admin} \
+        --password ${AIRFLOW_ADMIN_PASSWORD:-admin} \
+        --firstname ${AIRFLOW_ADMIN_FIRSTNAME:-Admin} \
+        --lastname ${AIRFLOW_ADMIN_LASTNAME:-User} \
+        --role Admin \
+        --email ${AIRFLOW_ADMIN_EMAIL:-admin@example.com} || true"
+    restart: "no"
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
 
-
-  # -------------------------------
-  # Scheduler
-  # -------------------------------
   scheduler:
     <<: *airflow-common
-    container_name: airflow-scheduler
+    container_name: energy-airflow-scheduler
     command: bash -c "airflow scheduler"
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$${HOSTNAME}\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    cpus: "2.0"
+    mem_limit: "2g"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: always
+
+  webserver:
+    <<: *airflow-common
+    container_name: energy-airflow-webserver
+    command: bash -c "airflow webserver"
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    cpus: "1.0"
+    mem_limit: "1g"
+    depends_on:
+      scheduler:
+        condition: service_healthy
+    restart: always
+
+  triggerer:
+    <<: *airflow-common
+    container_name: energy-airflow-triggerer
+    command: bash -c "airflow triggerer"
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type TriggererJob --hostname \"$${HOSTNAME}\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    cpus: "1.0"
+    mem_limit: "512m"
     depends_on:
       airflow-init:
         condition: service_completed_successfully
     restart: always
 
 
-  # -------------------------------
-  # Webserver
-  # -------------------------------
-  webserver:
-    <<: *airflow-common
-    container_name: airflow-webserver
-    command: bash -c "airflow webserver"
-    ports:
-      - "8081:8080"                        # 기존 구동주인 airflow 컨테이너와 포트번호가 겹치지 않기위해 변경
-    depends_on:
-      scheduler:
-        condition: service_started
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    restart: always
-
-
-  # -------------------------------
-  # Triggerer
-  # -------------------------------
-  triggerer:
-    <<: *airflow-common
-    container_name: airflow-triggerer
-    command: bash -c "airflow triggerer"
-    restart: always
-
-
-  # -------------------------------
-  # Celery Worker
-  # -------------------------------
-  worker:
-    <<: *airflow-common
-    container_name: airflow-worker
-    command: bash -c "airflow celery worker"
-    restart: always
-
-
-  # -------------------------------
-  # Flower (Celery Monitoring)
-  # -------------------------------
-  flower:
-    <<: *airflow-common
-    container_name: airflow-flower
-    command: bash -c "airflow celery flower"
-    ports:
-      - "5555:5555"
-    restart: always
-
-
-# ====================================
-#  VOLUMES
-# ====================================
 volumes:
-  postgres-db-volume:
-  
+  energy-postgres-db-volume:
+    driver: local
