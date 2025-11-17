@@ -4,7 +4,7 @@ from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from datetime import datetime
 from airflow.models import Variable
 import requests
-
+import pendulum
 
 def get_Snowflake_connection(autocommit=True):
     hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
@@ -202,12 +202,13 @@ def load(schema, table, records):
         cur.close()
         conn.close()
 
+
 with DAG(
     dag_id = 'school_info_DAEGU',
-    start_date = datetime(2025, 11, 15),
+    start_date = pendulum.datetime(2025, 10, 1, tz="Asia/Seoul"),
     catchup = False,
     tags = ['API', 'school_info', 'daegu'],
-    schedule = '0 1 * * *'
+    schedule = '0 1 * * *',
 ) as dag:
 
     API_URL = 'https://open.neis.go.kr/hub/schoolInfo'
