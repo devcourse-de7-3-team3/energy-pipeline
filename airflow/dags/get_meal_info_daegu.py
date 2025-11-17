@@ -19,7 +19,7 @@ def get_code_daegu():
     sql = """
         SELECT DISTINCT atpt_ofcdc_sc_code, sd_schul_code
         FROM ENERGY_DB.RAW_DATA.SCHOOL_INFO_DAEGU
-        WHERE SCHUL_NM like '%고등학교';
+        WHERE SCHUL_NM like '%고등학교%';
     """
     cur.execute(sql)
     code_list = [(r[0], r[1]) for r in cur.fetchall()]
