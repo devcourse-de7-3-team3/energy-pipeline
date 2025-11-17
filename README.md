@@ -14,8 +14,12 @@ energy-pipeline/
 │   ├── plugins/           # 커스텀 플러그인
 │   ├── logs/              # Airflow 로그 (자동 생성)
 │   └── Dockerfile         # Airflow 이미지 빌드 파일
-├── dbt/                   # dbt 프로젝트
-│   └── energy_model/      # Energy 모델
+├── meal_dbt/              # dbt 프로젝트
+│   ├── models/            # dbt models 폴더
+│   │   ├── sources/       # snowflake raw_schema 테이블 연결 
+│   │   ├── staging/       # STG_DATA schema에 MEAL_DIET_INFO_ALL 테이블 생성
+│   │   └── analytics/     # 시각화용 테이블 생성
+│   └── dbt_profiles       # profiles.yml 수정 필요
 ├── docker-compose.yml     # Docker Compose 설정
 ├── .env                   # 환경 변수 (생성 필요)
 ├── .env.example           # 환경 변수 예시
