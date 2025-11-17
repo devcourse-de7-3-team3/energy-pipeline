@@ -1,0 +1,14 @@
+meal_dbt:
+  outputs:
+    dev:
+      type: snowflake
+      account: "jkphfwm-ib92612"
+      user: "<USER_NAME>"
+      password: "<PASSWORD>"
+      role: "ANALYTICS_AUTHOR"
+      warehouse: "COMPUTE_WH"
+      database: "ENERGY_DB"
+      schema: "analytics"
+      threads: 4
+  target: dev
+
