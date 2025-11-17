@@ -16,7 +16,7 @@ def fetch_and_load(**context):
         "KEY": API_KEY,
         "Type": "json",
         "pIndex": 1,
-        "pSize": 100,
+        "pSize": 200,
         "ATPT_OFCDC_SC_CODE": "C10",
         "SCHUL_KND_SC_NM": "고등학교"
     }
