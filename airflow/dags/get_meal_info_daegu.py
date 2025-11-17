@@ -92,22 +92,23 @@ def create_table(schema, table):
 
     sql = f"""
     CREATE TABLE IF NOT EXISTS {schema}.{table} (
-        ATPT_OFCDC_SC_CODE   VARCHAR,
-        ATPT_OFCDC_SC_NM     VARCHAR,
-        SD_SCHUL_CODE        VARCHAR,
-        SCHUL_NM             VARCHAR,
-        MMEAL_SC_CODE        VARCHAR,
-        MMEAL_SC_NM          VARCHAR,
-        MLSV_YMD             VARCHAR,
-        MLSV_FGR             VARCHAR,
-        DDISH_NM             VARCHAR,
-        ORPLC_INFO           VARCHAR,
-        CAL_INFO             VARCHAR,
-        NTR_INFO             VARCHAR,
-        MLSV_FROM_YMD        VARCHAR,
-        MLSV_TO_YMD          VARCHAR,
-        LOAD_DTM             VARCHAR,
-        PRIMARY KEY (SD_SCHUL_CODE, MMEAL_SC_CODE, MLSV_YMD)
+        ATPT_OFCDC_SC_CODE   VARCHAR COMMENT '시도교육청코드',
+        ATPT_OFCDC_SC_NM     VARCHAR COMMENT '시도교육청명',
+        SD_SCHUL_CODE        VARCHAR COMMENT '행정표준코드(학교 고유코드)',
+        SCHUL_NM             VARCHAR COMMENT '학교명',
+        MMEAL_SC_CODE        VARCHAR COMMENT '식사코드(1:조식, 2:중식, 3:석식)',
+        MMEAL_SC_NM          VARCHAR COMMENT '식사명(조식/중식/석식)',
+        MLSV_YMD             VARCHAR COMMENT '급식일자(YYYYMMDD)',
+        MLSV_FGR             VARCHAR COMMENT '급식인원수',
+        DDISH_NM             VARCHAR COMMENT '요리명',
+        ORPLC_INFO           VARCHAR COMMENT '원산지정보',
+        CAL_INFO             VARCHAR COMMENT '칼로리정보',
+        NTR_INFO             VARCHAR COMMENT '영양정보',
+        MLSV_FROM_YMD        VARCHAR COMMENT '급식시작일자',
+        MLSV_TO_YMD          VARCHAR COMMENT '급식종료일자',
+        LOAD_DTM             VARCHAR COMMENT '수정일자(데이터 업데이트 일시)',
+        CONSTRAINT PK_MEAL_INFO_DAEGU
+            PRIMARY KEY (ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE, MMEAL_SC_CODE, MLSV_YMD)
     );
     """
 
