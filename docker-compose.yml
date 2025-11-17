@@ -32,14 +32,14 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
     AIRFLOW__CORE__PLUGINS_FOLDER: /opt/airflow/plugins
 
-    DBT_PROFILES_DIR: /opt/airflow/dbt/energy_model
+    DBT_PROFILES_DIR: /opt/airflow/meal_dbt/dbt_profiles
     DBT_TARGET: dev
 
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/plugins:/opt/airflow/plugins
     - ./airflow/logs:/opt/airflow/logs:rw
-    - ./dbt:/opt/airflow/dbt
+    - ./meal_dbt:/opt/airflow/meal_dbt
 
   user: "${AIRFLOW_UID:-50000}:0"
   networks:

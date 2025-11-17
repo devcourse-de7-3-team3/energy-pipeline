@@ -110,4 +110,4 @@ all_meals as (
 
 select *
 from all_meals
-where MLSV_YMD >= date '2025-10-01' and SCHUL_NM like '%고등학교%'
+where MLSV_YMD >= date '2025-10-01' and SCHUL_NM like '%고등학교%' and MMEAL_SC_CODE = 2
