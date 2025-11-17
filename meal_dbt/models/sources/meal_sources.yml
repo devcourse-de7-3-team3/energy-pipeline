@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw_data
+    database: ENERGY_DB
+    schema: RAW_DATA
+    tables:
+      - name: MEAL_DIET_INFO_INCHEON
+      - name: MEAL_DIET_INFO_GWANGJU
+      - name: MEAL_DIET_INFO_DAEGU
+      - name: MEAL_DIET_INFO_BUSAN

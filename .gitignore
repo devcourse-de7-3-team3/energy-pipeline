@@ -60,15 +60,18 @@ volumes/
 # -----------------------------
 # ⚙️ dbt
 # -----------------------------
-# dbt 실행 결과 / 캐시
-dbt/energy_model/target/
-dbt/energy_model/dbt_packages/
-dbt/energy_model/logs/
-dbt/energy_model/__pycache__/
+# dbt 로컬 프로필
+meal_dbt/dbt_profiles/profiles.yml
+meal_dbt/dbt_profiles/.user.yml
 
-# dbt profiles.yml은 env_var() 기반이라 안전하므로 포함
-# ⚠️ IMPORTANT: Do NOT replace env_var() values with credentials.
-!dbt/energy_model/profiles.yml
+# dbt 빌드 결과
+meal_dbt/target/
+meal_dbt/logs/
+__pycache__/
+
+# Python cache
+meal_dbt/**/__pycache__/
+__pycache__/
 
 # -----------------------------
 # 💻 macOS 자동 생성 파일 (중요!)
