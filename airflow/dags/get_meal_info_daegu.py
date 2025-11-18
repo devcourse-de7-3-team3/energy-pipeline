@@ -4,7 +4,6 @@ from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from datetime import datetime
 from airflow.models import Variable
 import requests
-import pendulum
 
 def get_Snowflake_connection(autocommit=True):
     hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
@@ -196,10 +195,10 @@ def load(schema, table, records):
 
 with DAG(
     dag_id = 'meal_info_DAEGU',
-    start_date = pendulum.datetime(2025, 10, 1, tz="Asia/Seoul"),
+    start_date = datetime(2025, 10, 31, 16, 15),
     catchup = True,
     tags = ['API', 'meal_info', 'daegu'],
-    schedule = '10 1 * * *',
+    schedule = '10 16 * * *',
 ) as dag:
 
     API_URL = 'https://open.neis.go.kr/hub/mealServiceDietInfo'
