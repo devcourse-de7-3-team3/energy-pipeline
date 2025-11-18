@@ -185,7 +185,7 @@ with DAG(
     dag_id='MEAL_DIET_INFO_Gwangju',
     start_date=datetime(2025,10,1), # dag가 실행되어야할 가장 이른 날짜
     schedule='0 1 * * *',
-    max_active_runs=1,
+    max_active_runs=7,
     catchup=True,
     default_args={
         'retries': 1,
