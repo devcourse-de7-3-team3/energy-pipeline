@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.decorators import task
+from airflow.models import Variable
 import requests
 import urllib.parse # ServiceKey 디코딩을 위한 모듈 추가
 import requests
@@ -47,7 +48,7 @@ def get_school_info(school_data):
 def extract_transform():
     BASE_URL = "https://open.neis.go.kr/hub/schoolInfo"
 
-    DECODED_SERVICE_KEY = urllib.parse.unquote('ca84f68dfb0f408fb2e126a790dda3fe')
+    DECODED_SERVICE_KEY = Variable.get("NEIS_KEY_school")
     school_info=[]
     
     parameters = {
