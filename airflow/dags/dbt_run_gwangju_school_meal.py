@@ -4,7 +4,7 @@ from airflow.sensors.external_task import ExternalTaskSensor
 from datetime import datetime, timedelta
 
 default_args = {
-    "owner": "simhoon",
+    "owner": "yewon",
     "retries": 2,
     "retry_delay": timedelta(minutes=1),
 }
