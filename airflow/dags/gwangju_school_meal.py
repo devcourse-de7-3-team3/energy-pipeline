@@ -11,7 +11,6 @@ import psycopg2
 from datetime import datetime, date, timedelta
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 import snowflake.connector
-from pendulum import timezone
 
 
 def get_snowflake_cursor(snowflake_conn_id: str='snowflake_conn') -> snowflake.connector.cursor.SnowflakeCursor:
@@ -76,7 +75,7 @@ def get_meal_info(school_info):
 def extract_transform(school_code_list, **context):
     BASE_URL = "https://open.neis.go.kr/hub/mealServiceDietInfo"
 
-    DECODED_SERVICE_KEY = Variable.get("NEIS_KEY_school")
+    DECODED_SERVICE_KEY = Variable.get("NEIS_KEY_meal")
     print("전체 학교 수 ", len(school_code_list))
     school_meal=[]
     execution_date = context.get('ds')
@@ -182,12 +181,9 @@ def load(schema, table, records, **context):
         raise
     logging.info("load done")
 
-
-seoul = timezone("Asia/Seoul")
-
 with DAG(
     dag_id='MEAL_DIET_INFO_Gwangju',
-    start_date=datetime(2025,10,1, tzinfo=seoul), # dag가 실행되어야할 가장 이른 날짜
+    start_date=datetime(2025,10,1), # dag가 실행되어야할 가장 이른 날짜
     schedule='0 1 * * *',
     max_active_runs=1,
     catchup=True,

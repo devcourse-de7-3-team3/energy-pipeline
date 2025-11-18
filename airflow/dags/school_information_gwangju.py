@@ -11,7 +11,6 @@ import psycopg2
 from datetime import datetime, date, timedelta
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 import snowflake.connector
-from pendulum import timezone
 
 
 def get_snowflake_cursor(snowflake_conn_id: str='snowflake_conn') -> snowflake.connector.cursor.SnowflakeCursor:
@@ -123,11 +122,9 @@ def load(schema, table, records):
     logging.info("load done")
 
 
-seoul = timezone("Asia/Seoul")
-
 with DAG(
     dag_id='SCHOOL_INFO_GWANGJU',
-    start_date=datetime(2025,11,17, tzinfo=seoul), # dag가 실행되어야할 가장 이른 날짜
+    start_date=datetime(2025,11,17), # dag가 실행되어야할 가장 이른 날짜
     schedule='0 0 * * *',
     max_active_runs=1,
     catchup=True,
