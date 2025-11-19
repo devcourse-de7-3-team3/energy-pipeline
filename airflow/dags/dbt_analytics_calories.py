@@ -13,7 +13,7 @@ with DAG(
     dag_id="dbt_calorie_daily",
     default_args=default_args,
     start_date=datetime(2025, 11, 17),      
-    schedule_interval="20 2 * * *",
+    schedule_interval="0 18 * * *",
     catchup=False,
     tags=["calorie", "dbt", "analytics"],
 ) as dag:

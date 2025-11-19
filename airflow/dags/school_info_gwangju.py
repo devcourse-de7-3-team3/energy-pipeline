@@ -125,7 +125,7 @@ def load(schema, table, records):
 with DAG(
     dag_id='SCHOOL_INFO_GWANGJU',
     start_date=datetime(2025,11,17), # dag가 실행되어야할 가장 이른 날짜
-    schedule='0 0 * * *',
+    schedule="0 16 * * *",
     max_active_runs=1,
     catchup=True,
     default_args={

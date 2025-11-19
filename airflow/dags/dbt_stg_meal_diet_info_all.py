@@ -13,7 +13,7 @@ with DAG(
     dag_id="dbt_stg_meal_diet_info_all_daily",
     default_args=default_args,
     start_date=datetime(2025, 11, 17),      
-    schedule_interval="0 2 * * *",
+    schedule_interval="0 17 * * *",
     catchup=False,
     tags=["meal", "dbt", "staging"],
 ) as dag:

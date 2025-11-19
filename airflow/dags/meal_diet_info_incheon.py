@@ -31,7 +31,7 @@ default_args = {
 with DAG(
     dag_id="meal_diet_info_incheon",
     start_date=datetime(2025, 10, 1),
-    schedule="10 1 * * *",
+    schedule="10 16 * * *",
     catchup=True,
     default_args=default_args,
     tags=["API", "meal_info", "incheon", "snowflake"],

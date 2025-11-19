@@ -95,7 +95,7 @@ default_args = {
 dag = DAG(
     dag_id="SCHOOL_INFO_BUSAN_DAG",
     start_date=datetime(2025, 10, 1),
-    schedule_interval=None,      
+    schedule="0 16 * * *",      
     catchup=False,               
     default_args=default_args
 )

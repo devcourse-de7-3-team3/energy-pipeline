@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.operators.bash import BashOperator
 
 default_args = {
-    "owner": "simhoon",
+    "owner": "jaemin",
     "retries": 2,
     "retry_delay": timedelta(minutes=1),
 }
@@ -13,7 +13,7 @@ with DAG(
     dag_id="dbt_analytics_daily",          
     default_args=default_args,
     start_date=datetime(2025, 11, 17),      
-    schedule_interval="0 3 * * *",          # 매일 03:00 실행 (stg 끝난 후 실행)
+    schedule_interval="0 18 * * *",          # 매일 03:00 실행 (stg 끝난 후 실행)
     catchup=False,
     tags=["meal", "dbt", "analytics"],
 ) as dag:

@@ -30,7 +30,7 @@ default_args = {
 with DAG(
     dag_id="school_info_incheon",
     start_date=datetime(2025, 11, 16),
-    schedule='0 1 * * *',
+    schedule="0 16 * * *",
     catchup=False,
     default_args=default_args,
     tags=["API", "school_info", "incheon", "snowflake"],

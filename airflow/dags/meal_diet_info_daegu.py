@@ -198,7 +198,7 @@ with DAG(
     start_date = datetime(2025, 10, 31, 16, 15),
     catchup = True,
     tags = ['API', 'meal_info', 'daegu'],
-    schedule = '10 16 * * *',
+    schedule="10 16 * * *",
 ) as dag:
 
     API_URL = 'https://open.neis.go.kr/hub/mealServiceDietInfo'

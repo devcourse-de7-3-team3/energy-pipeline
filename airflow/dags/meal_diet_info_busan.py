@@ -30,7 +30,7 @@ default_args = {
 with DAG(
     dag_id="busan_meal_to_snowflake_fast",
     start_date=datetime(2025, 10, 1),
-    schedule="@daily",
+    schedule="10 16 * * *",
     catchup=True,
 
     # 🔥 병렬로 5개 날짜 처리 → 5배 빨라짐
