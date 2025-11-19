@@ -1,4 +1,4 @@
-# 🍱 School Meal Data Pipeline  
+# 🍱 고등학교 급식 데이터 파이프라인 구축 및 분석 대시보드 
 한국 고등학교 급식 데이터를 수집·정제·모델링·시각화하는 엔드투엔드(End-to-End) 데이터 엔지니어링 프로젝트입니다.
 
 본 프로젝트는 [나이스 교육정보 개방 포털](https://open.neis.go.kr/portal/mainPage.do) 에서
@@ -41,7 +41,7 @@ energy-pipeline/
 │   └── Dockerfile         # Airflow 이미지 빌드 파일
 ├── meal_dbt/              # dbt 프로젝트
 │   ├── models/            # dbt models 폴더
-│   │   ├── sources/       # snowflake raw_schema 테이블 연결 
+│   │   ├── sources/       # snowflake의 RAW_DATA 테이블 및 STG_DATA 테이블 연결 
 │   │   ├── staging/       # STG_DATA schema에 MEAL_DIET_INFO_ALL 테이블 생성
 │   │   └── analytics/     # 시각화용 테이블 생성
 │   └── dbt_profiles       # profiles.yml 수정 필요
