@@ -18,6 +18,7 @@ x-airflow-common: &airflow-common
     - .env
   environment:
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
       postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}
 
@@ -34,6 +35,8 @@ x-airflow-common: &airflow-common
 
     DBT_PROFILES_DIR: /opt/airflow/meal_dbt/dbt_profiles
     DBT_TARGET: dev
+
+
 
   volumes:
     - ./airflow/dags:/opt/airflow/dags
