@@ -29,5 +29,5 @@ with DAG(
     
     dbt_run_gwanju_school_meal = BashOperator(
         task_id="dbt_run_gwangju_school_meal",
-        bash_command="cd /opt/airflow/meal_dbt/models/analytics && dbt run -s inter_menu"
+        bash_command="cd /opt/airflow/meal_dbt/models/analytics && dbt run -s menu"
     )

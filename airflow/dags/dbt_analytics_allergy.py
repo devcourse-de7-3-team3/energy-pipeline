@@ -22,6 +22,6 @@ with DAG(
         task_id="run_dbt_analytics",
         bash_command=(
             "cd /opt/airflow/meal_dbt && "
-            "dbt run -s analytics"          # analytics 폴더만 실행
+            "dbt run -s allergy"          # analytics 폴더만 실행
         ),
     )   
