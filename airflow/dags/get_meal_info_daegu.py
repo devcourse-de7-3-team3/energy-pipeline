@@ -4,7 +4,6 @@ from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from datetime import datetime
 from airflow.models import Variable
 import requests
-import pendulum
 
 def get_Snowflake_connection(autocommit=True):
     hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
@@ -19,7 +18,7 @@ def get_code_daegu():
     sql = """
         SELECT DISTINCT atpt_ofcdc_sc_code, sd_schul_code
         FROM ENERGY_DB.RAW_DATA.SCHOOL_INFO_DAEGU
-        WHERE SCHUL_NM like '%고등학교';
+        WHERE SCHUL_NM like '%고등학교%';
     """
     cur.execute(sql)
     code_list = [(r[0], r[1]) for r in cur.fetchall()]
@@ -92,22 +91,23 @@ def create_table(schema, table):
 
     sql = f"""
     CREATE TABLE IF NOT EXISTS {schema}.{table} (
-        ATPT_OFCDC_SC_CODE   VARCHAR,
-        ATPT_OFCDC_SC_NM     VARCHAR,
-        SD_SCHUL_CODE        VARCHAR,
-        SCHUL_NM             VARCHAR,
-        MMEAL_SC_CODE        VARCHAR,
-        MMEAL_SC_NM          VARCHAR,
-        MLSV_YMD             VARCHAR,
-        MLSV_FGR             VARCHAR,
-        DDISH_NM             VARCHAR,
-        ORPLC_INFO           VARCHAR,
-        CAL_INFO             VARCHAR,
-        NTR_INFO             VARCHAR,
-        MLSV_FROM_YMD        VARCHAR,
-        MLSV_TO_YMD          VARCHAR,
-        LOAD_DTM             VARCHAR,
-        PRIMARY KEY (SD_SCHUL_CODE, MMEAL_SC_CODE, MLSV_YMD)
+        ATPT_OFCDC_SC_CODE   VARCHAR COMMENT '시도교육청코드',
+        ATPT_OFCDC_SC_NM     VARCHAR COMMENT '시도교육청명',
+        SD_SCHUL_CODE        VARCHAR COMMENT '행정표준코드(학교 고유코드)',
+        SCHUL_NM             VARCHAR COMMENT '학교명',
+        MMEAL_SC_CODE        VARCHAR COMMENT '식사코드(1:조식, 2:중식, 3:석식)',
+        MMEAL_SC_NM          VARCHAR COMMENT '식사명(조식/중식/석식)',
+        MLSV_YMD             VARCHAR COMMENT '급식일자(YYYYMMDD)',
+        MLSV_FGR             VARCHAR COMMENT '급식인원수',
+        DDISH_NM             VARCHAR COMMENT '요리명',
+        ORPLC_INFO           VARCHAR COMMENT '원산지정보',
+        CAL_INFO             VARCHAR COMMENT '칼로리정보',
+        NTR_INFO             VARCHAR COMMENT '영양정보',
+        MLSV_FROM_YMD        VARCHAR COMMENT '급식시작일자',
+        MLSV_TO_YMD          VARCHAR COMMENT '급식종료일자',
+        LOAD_DTM             VARCHAR COMMENT '수정일자(데이터 업데이트 일시)',
+        CONSTRAINT PK_MEAL_INFO_DAEGU
+            PRIMARY KEY (ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE, MMEAL_SC_CODE, MLSV_YMD)
     );
     """
 
@@ -195,10 +195,10 @@ def load(schema, table, records):
 
 with DAG(
     dag_id = 'meal_info_DAEGU',
-    start_date = pendulum.datetime(2025, 10, 1, tz="Asia/Seoul"),
+    start_date = datetime(2025, 10, 31, 16, 15),
     catchup = True,
     tags = ['API', 'meal_info', 'daegu'],
-    schedule = '10 1 * * *',
+    schedule = '10 16 * * *',
 ) as dag:
 
     API_URL = 'https://open.neis.go.kr/hub/mealServiceDietInfo'
