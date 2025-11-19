@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.decorators import task
+from airflow.models import Variable
 import requests
 import urllib.parse # ServiceKey 디코딩을 위한 모듈 추가
 import requests
@@ -10,7 +11,6 @@ import psycopg2
 from datetime import datetime, date, timedelta
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 import snowflake.connector
-from pendulum import timezone
 
 
 def get_snowflake_cursor(snowflake_conn_id: str='snowflake_conn') -> snowflake.connector.cursor.SnowflakeCursor:
@@ -47,7 +47,7 @@ def get_school_info(school_data):
 def extract_transform():
     BASE_URL = "https://open.neis.go.kr/hub/schoolInfo"
 
-    DECODED_SERVICE_KEY = urllib.parse.unquote('ca84f68dfb0f408fb2e126a790dda3fe')
+    DECODED_SERVICE_KEY = Variable.get("NEIS_KEY_school")
     school_info=[]
     
     parameters = {
@@ -122,11 +122,9 @@ def load(schema, table, records):
     logging.info("load done")
 
 
-seoul = timezone("Asia/Seoul")
-
 with DAG(
     dag_id='SCHOOL_INFO_GWANGJU',
-    start_date=datetime(2025,11,17, tzinfo=seoul), # dag가 실행되어야할 가장 이른 날짜
+    start_date=datetime(2025,11,17), # dag가 실행되어야할 가장 이른 날짜
     schedule='0 0 * * *',
     max_active_runs=1,
     catchup=True,
