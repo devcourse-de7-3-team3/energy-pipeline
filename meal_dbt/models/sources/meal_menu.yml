@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: STG_DATA
+    database: ENERGY_DB
+    schema: STG_DATA
+    tables:
+      - name: MEAL_DIET_INFO_ALL
