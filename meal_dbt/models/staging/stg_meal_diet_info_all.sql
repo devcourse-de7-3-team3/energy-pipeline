@@ -1,5 +1,6 @@
 {{ config(
-    alias='MEAL_DIET_INFO_ALL'
+    alias='MEAL_DIET_INFO_ALL',
+    schema='STG_DATA'
 ) }}
 
 with incheon as (
