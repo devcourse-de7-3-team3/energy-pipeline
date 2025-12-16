@@ -95,7 +95,7 @@ def extract_transform(school_code_list, **context):
         logging.error("execution_date가 전달되지 않음")
         return []
     cnt=1
-    for code in school_code_list:           ##### 자주 건드리는 반복문!!!!! 확인!!!!! ##################
+    for code in school_code_list: 
         parameters = {
             "Key": DECODED_SERVICE_KEY, 
             "Type": 'json',
@@ -110,7 +110,7 @@ def extract_transform(school_code_list, **context):
         logging.info(f"추출 중인 학교: {code} 순서: {cnt}/71")
         cnt += 1
         try:
-            response = requests.get(BASE_URL, params=parameters)    # 학교 하나, 날짜 하나
+            response = requests.get(BASE_URL, params=parameters) 
 
             if response.status_code == 200:
                 data = response.json()
