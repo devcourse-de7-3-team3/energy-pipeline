@@ -82,15 +82,8 @@ def extract_transform(school_code_list, **context):
     
     if execution_date:
         execution_dt = datetime.strptime(execution_date, '%Y-%m-%d')
-        target_date_str = execution_dt.strftime('%Y%m%d')        
-        logging.info(f"[Execution date(raw)] = {execution_date}")
-        logging.info(f"[Execution date(parsed)] = {execution_dt}")
+        target_date_str = execution_dt.strftime('%Y%m%d')
         logging.info(f"[Target date] = {target_date_str}")
-
-        nodate = ['20250930']
-        if target_date_str in nodate:
-            return []
-        
     else:
         logging.error("execution_date가 전달되지 않음")
         return []
